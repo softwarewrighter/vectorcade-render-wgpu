@@ -6,22 +6,37 @@
 //! # Modules
 //!
 //! - [`null`] - Null renderer for testing and headless runs
-//! - [`renderer`] - VectorRenderer trait definition
-//! - [`stats`] - Render statistics
 //! - [`tessellate`] - Line tessellation using lyon
 //! - [`wgpu_backend`] - GPU renderer (requires `wgpu-backend` feature)
 
 mod null;
-mod renderer;
-mod stats;
 pub mod tessellate;
 
 #[cfg(feature = "wgpu-backend")]
 pub mod wgpu_backend;
 
+use vectorcade_shared::draw::DrawCmd;
+
+/// Statistics about rendered primitives.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct RenderStats {
+    /// Number of individual line segments rendered.
+    pub lines: u32,
+    /// Number of polyline paths rendered.
+    pub polylines: u32,
+    /// Number of text runs rendered.
+    pub text_runs: u32,
+}
+
+/// Trait for vector graphics renderers.
+///
+/// Implementations consume `DrawCmd` display-lists and produce rendered output.
+pub trait VectorRenderer {
+    /// Render a list of draw commands and return statistics.
+    fn render(&mut self, cmds: &[DrawCmd]) -> RenderStats;
+}
+
 pub use null::NullRenderer;
-pub use renderer::VectorRenderer;
-pub use stats::RenderStats;
 pub use tessellate::{Geometry, Vertex};
 
 #[cfg(feature = "wgpu-backend")]

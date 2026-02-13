@@ -17,7 +17,7 @@ fn tessellate_line_produces_geometry() {
         stroke: white_stroke(2.0),
     };
     let mut geom = Geometry::new();
-    tessellate_line(&line, &mut geom);
+    tessellate_line(&line, None, &mut geom);
 
     assert!(!geom.vertices.is_empty(), "should produce vertices");
     assert!(!geom.indices.is_empty(), "should produce indices");
@@ -28,7 +28,7 @@ fn tessellate_line_produces_geometry() {
 fn tessellate_polyline_produces_geometry() {
     let pts = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0]];
     let mut geom = Geometry::new();
-    tessellate_polyline(&pts, false, &white_stroke(1.0), &mut geom);
+    tessellate_polyline(&pts, false, &white_stroke(1.0), None, &mut geom);
 
     assert!(!geom.vertices.is_empty());
     assert!(!geom.indices.is_empty());
@@ -38,7 +38,7 @@ fn tessellate_polyline_produces_geometry() {
 fn tessellate_closed_polyline() {
     let pts = [[0.0, 0.0], [1.0, 0.0], [0.5, 1.0]];
     let mut geom = Geometry::new();
-    tessellate_polyline(&pts, true, &white_stroke(1.0), &mut geom);
+    tessellate_polyline(&pts, true, &white_stroke(1.0), None, &mut geom);
 
     assert!(!geom.vertices.is_empty());
 }
@@ -46,13 +46,13 @@ fn tessellate_closed_polyline() {
 #[test]
 fn empty_points_produces_no_geometry() {
     let mut geom = Geometry::new();
-    tessellate_polyline(&[], false, &white_stroke(1.0), &mut geom);
+    tessellate_polyline(&[], false, &white_stroke(1.0), None, &mut geom);
     assert!(geom.vertices.is_empty());
 }
 
 #[test]
 fn single_point_produces_no_geometry() {
     let mut geom = Geometry::new();
-    tessellate_polyline(&[[0.0, 0.0]], false, &white_stroke(1.0), &mut geom);
+    tessellate_polyline(&[[0.0, 0.0]], false, &white_stroke(1.0), None, &mut geom);
     assert!(geom.vertices.is_empty());
 }

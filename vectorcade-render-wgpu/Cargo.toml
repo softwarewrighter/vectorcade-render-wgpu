@@ -9,6 +9,7 @@ description = "WGPU renderer backend for VectorCade."
 vectorcade-shared = { version = "0.1.0" }
 lyon = "1.0"
 bytemuck = { version = "1.14", features = ["derive"] }
+glam = "0.27"
 
 # wgpu is optional until we build the full backend
 wgpu = { version = "0.20", optional = true }

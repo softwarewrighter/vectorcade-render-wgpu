@@ -4,9 +4,11 @@
 //! using wgpu (WebGPU in browser, Vulkan/Metal/DX12 native).
 
 mod pipeline;
+mod state;
 
 use crate::tessellate::{Geometry, tessellate_line, tessellate_polyline};
 use crate::{RenderStats, VectorRenderer};
+use state::RenderState;
 use vectorcade_shared::draw::DrawCmd;
 use wgpu::util::DeviceExt;
 
@@ -18,6 +20,7 @@ pub struct WgpuRenderer {
     surface: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
     geometry: Geometry,
+    state: RenderState,
 }
 
 impl WgpuRenderer {
@@ -32,7 +35,7 @@ impl WgpuRenderer {
     ) -> Result<Self, String> {
         let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::default());
         let surface = instance.create_surface(window).map_err(|e| e.to_string())?;
-        let (device, queue, config) = init_device(&instance, &surface, width, height).await?;
+        let (device, queue, config) = pipeline::init_device(&instance, &surface, width, height).await?;
         let surface_format = config.format;
         surface.configure(&device, &config);
         let pipeline = pipeline::create(&device, surface_format);
@@ -44,6 +47,7 @@ impl WgpuRenderer {
             surface,
             config,
             geometry: Geometry::new(),
+            state: RenderState::default(),
         })
     }
 
@@ -59,10 +63,8 @@ impl WgpuRenderer {
 
 impl VectorRenderer for WgpuRenderer {
     fn render(&mut self, cmds: &[DrawCmd]) -> RenderStats {
+        self.state.reset();
         let stats = self.tessellate_commands(cmds);
-        if self.geometry.vertices.is_empty() {
-            return stats;
-        }
 
         let Some(frame) = self.begin_frame() else {
             return stats;
@@ -81,8 +83,12 @@ impl WgpuRenderer {
 
         for cmd in cmds {
             match cmd {
+                DrawCmd::Clear { color } => self.state.clear = *color,
+                DrawCmd::PushTransform(t) => self.state.push(*t),
+                DrawCmd::PopTransform => self.state.pop(),
                 DrawCmd::Line(line) => {
-                    tessellate_line(line, &mut self.geometry);
+                    let t = self.state.transform_opt();
+                    tessellate_line(line, t.as_ref(), &mut self.geometry);
                     stats.lines += 1;
                 }
                 DrawCmd::Polyline {
@@ -90,8 +96,9 @@ impl WgpuRenderer {
                     closed,
                     stroke,
                 } => {
+                    let t = self.state.transform_opt();
                     let pts: Vec<[f32; 2]> = pts.iter().map(|v| [v.x, v.y]).collect();
-                    tessellate_polyline(&pts, *closed, stroke, &mut self.geometry);
+                    tessellate_polyline(&pts, *closed, stroke, t.as_ref(), &mut self.geometry);
                     stats.polylines += 1;
                 }
                 DrawCmd::Text { .. } => stats.text_runs += 1,
@@ -134,7 +141,7 @@ impl WgpuRenderer {
                     view: &frame.view,
                     resolve_target: None,
                     ops: wgpu::Operations {
-                        load: wgpu::LoadOp::Clear(wgpu::Color::BLACK),
+                        load: wgpu::LoadOp::Clear(self.state.clear_color()),
                         store: wgpu::StoreOp::Store,
                     },
                 })],
@@ -153,46 +160,4 @@ impl WgpuRenderer {
 struct Frame {
     output: wgpu::SurfaceTexture,
     view: wgpu::TextureView,
-}
-
-async fn init_device(
-    instance: &wgpu::Instance,
-    surface: &wgpu::Surface<'_>,
-    width: u32,
-    height: u32,
-) -> Result<(wgpu::Device, wgpu::Queue, wgpu::SurfaceConfiguration), String> {
-    let adapter = instance
-        .request_adapter(&wgpu::RequestAdapterOptions {
-            power_preference: wgpu::PowerPreference::default(),
-            compatible_surface: Some(surface),
-            force_fallback_adapter: false,
-        })
-        .await
-        .ok_or("Failed to find suitable GPU adapter")?;
-
-    let (device, queue) = adapter
-        .request_device(&wgpu::DeviceDescriptor::default(), None)
-        .await
-        .map_err(|e| e.to_string())?;
-
-    let caps = surface.get_capabilities(&adapter);
-    let format = caps
-        .formats
-        .iter()
-        .find(|f| f.is_srgb())
-        .copied()
-        .unwrap_or(caps.formats[0]);
-
-    let config = wgpu::SurfaceConfiguration {
-        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
-        format,
-        width,
-        height,
-        present_mode: wgpu::PresentMode::Fifo,
-        alpha_mode: caps.alpha_modes[0],
-        view_formats: vec![],
-        desired_maximum_frame_latency: 2,
-    };
-
-    Ok((device, queue, config))
 }

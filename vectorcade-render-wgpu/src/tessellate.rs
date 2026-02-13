@@ -2,6 +2,7 @@
 //!
 //! Converts vector primitives into triangle meshes for GPU rendering.
 
+use glam::Mat3;
 use lyon::math::Point;
 use lyon::path::Path;
 use lyon::tessellation::{
@@ -39,13 +40,37 @@ impl Geometry {
 }
 
 /// Tessellate a single line segment into triangles.
-pub fn tessellate_line(line: &Line2, geom: &mut Geometry) {
-    tessellate_stroke(&[line.a.into(), line.b.into()], false, &line.stroke, geom);
+pub fn tessellate_line(line: &Line2, transform: Option<&Mat3>, geom: &mut Geometry) {
+    let xform = |p: [f32; 2], t: &Mat3| {
+        let r = *t * glam::Vec3::new(p[0], p[1], 1.0);
+        [r.x, r.y]
+    };
+    let (a, b): ([f32; 2], [f32; 2]) = match transform {
+        Some(t) => (xform(line.a.into(), t), xform(line.b.into(), t)),
+        None => (line.a.into(), line.b.into()),
+    };
+    tessellate_stroke(&[a, b], false, &line.stroke, geom);
 }
 
 /// Tessellate a polyline into triangles.
-pub fn tessellate_polyline(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, geom: &mut Geometry) {
-    tessellate_stroke(pts, closed, stroke, geom);
+pub fn tessellate_polyline(
+    pts: &[[f32; 2]],
+    closed: bool,
+    stroke: &Stroke,
+    transform: Option<&Mat3>,
+    geom: &mut Geometry,
+) {
+    let pts: Vec<[f32; 2]> = match transform {
+        Some(t) => pts
+            .iter()
+            .map(|p| {
+                let r = *t * glam::Vec3::new(p[0], p[1], 1.0);
+                [r.x, r.y]
+            })
+            .collect(),
+        None => pts.to_vec(),
+    };
+    tessellate_stroke(&pts, closed, stroke, geom);
 }
 
 fn tessellate_stroke(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, geom: &mut Geometry) {
@@ -54,7 +79,10 @@ fn tessellate_stroke(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, geom: &mut
     }
 
     let path = build_path(pts, closed);
-    let options = stroke_options(stroke.width_px);
+    let options = StrokeOptions::default()
+        .with_line_width(stroke.width_px)
+        .with_line_cap(LineCap::Round)
+        .with_line_join(LineJoin::Round);
     let color = [
         stroke.color.0,
         stroke.color.1,
@@ -66,16 +94,17 @@ fn tessellate_stroke(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, geom: &mut
     let mut buffers: VertexBuffers<Vertex, u32> = VertexBuffers::new();
     let mut tessellator = StrokeTessellator::new();
 
-    let result = tessellator.tessellate_path(
-        &path,
-        &options,
-        &mut BuffersBuilder::new(&mut buffers, |v: lyon::tessellation::StrokeVertex| Vertex {
-            position: [v.position().x, v.position().y],
-            color,
-        }),
-    );
-
-    if result.is_ok() {
+    if tessellator
+        .tessellate_path(
+            &path,
+            &options,
+            &mut BuffersBuilder::new(&mut buffers, |v: lyon::tessellation::StrokeVertex| Vertex {
+                position: [v.position().x, v.position().y],
+                color,
+            }),
+        )
+        .is_ok()
+    {
         geom.vertices.extend(buffers.vertices);
         geom.indices
             .extend(buffers.indices.iter().map(|i| i + base_vertex));
@@ -94,11 +123,4 @@ fn build_path(pts: &[[f32; 2]], closed: bool) -> Path {
         builder.end(false);
     }
     builder.build()
-}
-
-fn stroke_options(width: f32) -> StrokeOptions {
-    StrokeOptions::default()
-        .with_line_width(width)
-        .with_line_cap(LineCap::Round)
-        .with_line_join(LineJoin::Round)
 }

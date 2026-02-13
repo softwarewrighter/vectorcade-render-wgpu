@@ -88,3 +88,46 @@ fn vertex_layout() -> wgpu::VertexBufferLayout<'static> {
         ],
     }
 }
+
+/// Initialize wgpu device, queue, and surface configuration.
+pub async fn init_device(
+    instance: &wgpu::Instance,
+    surface: &wgpu::Surface<'_>,
+    width: u32,
+    height: u32,
+) -> Result<(wgpu::Device, wgpu::Queue, wgpu::SurfaceConfiguration), String> {
+    let adapter = instance
+        .request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::default(),
+            compatible_surface: Some(surface),
+            force_fallback_adapter: false,
+        })
+        .await
+        .ok_or("Failed to find suitable GPU adapter")?;
+
+    let (device, queue) = adapter
+        .request_device(&wgpu::DeviceDescriptor::default(), None)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let caps = surface.get_capabilities(&adapter);
+    let format = caps
+        .formats
+        .iter()
+        .find(|f| f.is_srgb())
+        .copied()
+        .unwrap_or(caps.formats[0]);
+
+    let config = wgpu::SurfaceConfiguration {
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        format,
+        width,
+        height,
+        present_mode: wgpu::PresentMode::Fifo,
+        alpha_mode: caps.alpha_modes[0],
+        view_formats: vec![],
+        desired_maximum_frame_latency: 2,
+    };
+
+    Ok((device, queue, config))
+}

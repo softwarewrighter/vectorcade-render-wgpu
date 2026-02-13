@@ -1,10 +1,10 @@
 # Project Status
 
-## Current State: Initial Setup
+## Current State: Core Rendering In Progress
 
 **Date**: 2026-02-12
-**Phase**: 1 - Foundation
-**Task**: 2.1 - DrawCmd Processing (Next)
+**Phase**: 2 - Core Rendering
+**Task**: 2.2 - Buffer Management (Next)
 
 ## Summary
 
@@ -31,10 +31,10 @@ The vectorcade-render-wgpu project is in its initial state. The basic project st
 
 ## What's Next
 
-1. Add lyon dependency and create tessellation module
-2. Implement line tessellation (thick strokes to triangles)
-3. Implement polyline tessellation
-4. Create wgpu backend skeleton
+1. Implement vertex buffer pooling
+2. Add dynamic buffer resizing
+3. Optimize per-frame updates
+4. Integrate with vectorcade-fonts for text rendering
 
 ## Blockers
 
@@ -56,3 +56,4 @@ The vectorcade-render-wgpu project is in its initial state. The basic project st
 | 2026-02-12 | Added NullRenderer tests, split lib.rs into modules |
 | 2026-02-12 | Added lyon tessellation module with line/polyline support |
 | 2026-02-12 | Added wgpu backend skeleton with WgpuRenderer |
+| 2026-02-12 | Implemented Clear commands, transform stack, render stats |

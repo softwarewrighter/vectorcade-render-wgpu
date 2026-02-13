@@ -26,11 +26,11 @@
 ## Phase 2: Core Rendering
 
 ### Task 2.1: DrawCmd Processing
-- [ ] Process Clear commands
-- [ ] Process Line commands (with tessellation)
-- [ ] Process Polyline commands
-- [ ] Implement transform stack
-- [ ] Add render stats tracking
+- [x] Process Clear commands
+- [x] Process Line commands (with tessellation)
+- [x] Process Polyline commands
+- [x] Implement transform stack
+- [x] Add render stats tracking
 
 ### Task 2.2: Buffer Management
 - [ ] Create vertex buffer pool
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 2.1 - DrawCmd processing (Clear, transform stack)
+**Next Step**: Task 2.2 - Buffer pooling and management
