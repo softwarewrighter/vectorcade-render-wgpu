@@ -6,8 +6,8 @@
 - [x] Initialize workspace with Cargo.toml
 - [x] Define VectorRenderer trait
 - [x] Implement NullRenderer
-- [ ] Add basic tests for NullRenderer
-- [ ] Run clippy/fmt checks
+- [x] Add basic tests for NullRenderer
+- [x] Run clippy/fmt checks
 
 ### Task 1.2: Lyon Integration
 - [ ] Add lyon dependency
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Complete Task 1.1 (add NullRenderer tests, run quality checks)
+**Next Step**: Task 1.2 - Lyon tessellation integration

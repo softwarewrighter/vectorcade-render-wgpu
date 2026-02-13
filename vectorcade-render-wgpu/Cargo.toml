@@ -15,3 +15,6 @@ lyon = { version = "1.0", optional = true }
 [features]
 default = []
 wgpu-backend = ["dep:wgpu", "dep:lyon"]
+
+[dev-dependencies]
+glam = "0.27"
