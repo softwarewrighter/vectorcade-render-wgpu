@@ -138,8 +138,7 @@ pub async fn init_device(
                 label: Some("VectorCade Device"),
                 required_features: wgpu::Features::empty(),
                 // Use downlevel defaults for maximum WebGPU browser compatibility
-                required_limits: wgpu::Limits::downlevel_webgl2_defaults()
-                    .using_resolution(adapter.limits()),
+                required_limits: wgpu::Limits::downlevel_webgl2_defaults(),
                 ..Default::default()
             },
             None,
