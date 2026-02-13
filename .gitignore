@@ -1,0 +1,26 @@
+# Rust/Cargo
+target/
+Cargo.lock
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# WASM build artifacts
+pkg/
+*.wasm
+
+# Test coverage
+*.profraw
+*.profdata
+
+# Temporary files
+*.tmp
+*.bak

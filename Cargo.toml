@@ -1,0 +1,3 @@
+[workspace]
+members = ["vectorcade-render-wgpu"]
+resolver = "2"
