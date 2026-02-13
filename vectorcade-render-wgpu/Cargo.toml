@@ -13,7 +13,7 @@ bytemuck = { version = "1.14", features = ["derive"] }
 glam = "0.27"
 
 # wgpu is optional until we build the full backend
-wgpu = { version = "0.20", optional = true }
+wgpu = { version = "24", optional = true }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 web-sys = { version = "0.3", features = ["HtmlCanvasElement"] }

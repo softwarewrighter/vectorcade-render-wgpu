@@ -39,7 +39,7 @@ impl WgpuRenderer {
         width: u32,
         height: u32,
     ) -> Result<Self, String> {
-        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::default());
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
         let surface = instance.create_surface(window).map_err(|e| e.to_string())?;
         let (device, queue, config) = pipeline::init_device(&instance, &surface, width, height).await?;
         let surface_format = config.format;
