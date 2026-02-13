@@ -68,6 +68,19 @@ impl WgpuRenderer {
         })
     }
 
+    /// Create a new renderer for an HTML canvas element (WASM only).
+    ///
+    /// # Errors
+    /// Returns an error if GPU initialization fails.
+    #[cfg(target_arch = "wasm32")]
+    pub async fn new_web(
+        canvas: web_sys::HtmlCanvasElement,
+        width: u32,
+        height: u32,
+    ) -> Result<Self, String> {
+        Self::new(wgpu::SurfaceTarget::Canvas(canvas), width, height).await
+    }
+
     /// Resize the render surface.
     pub fn resize(&mut self, width: u32, height: u32) {
         if width > 0 && height > 0 {
@@ -88,7 +101,7 @@ impl VectorRenderer for WgpuRenderer {
             return stats;
         };
 
-        self.update_buffers();
+        self.buffers.update(&self.device, &self.queue, &self.geometry.vertices, &self.geometry.indices);
         self.draw_frame(&frame);
         frame.output.present();
         stats
@@ -140,15 +153,6 @@ impl WgpuRenderer {
             .texture
             .create_view(&wgpu::TextureViewDescriptor::default());
         Some(Frame { output, view })
-    }
-
-    fn update_buffers(&mut self) {
-        self.buffers.update(
-            &self.device,
-            &self.queue,
-            &self.geometry.vertices,
-            &self.geometry.indices,
-        );
     }
 
     fn draw_frame(&self, frame: &Frame) {
