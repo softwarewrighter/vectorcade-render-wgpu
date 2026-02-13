@@ -46,10 +46,10 @@
 ## Phase 3: Polish
 
 ### Task 3.1: Visual Quality
-- [ ] Fine-tune line caps (round)
-- [ ] Fine-tune line joins (round/miter)
-- [ ] Test stroke width accuracy
-- [ ] Add anti-aliasing (if needed)
+- [x] Fine-tune line caps (round)
+- [x] Fine-tune line joins (round/miter)
+- [x] Test stroke width accuracy
+- [x] Add anti-aliasing (4x MSAA)
 
 ### Task 3.2: Phosphor Glow (Optional)
 - [ ] Design glow approach
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Phase 3 - Visual quality polish (line caps, joins, anti-aliasing)
+**Next Step**: Task 3.2 - Phosphor Glow (optional) or Task 3.3 - WASM Build

@@ -22,6 +22,7 @@ pub struct WgpuRenderer {
     pipeline: wgpu::RenderPipeline,
     surface: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
+    msaa_view: wgpu::TextureView,
     buffers: BufferPool,
     fonts: FontRegistry,
     geometry: Geometry,
@@ -45,6 +46,7 @@ impl WgpuRenderer {
         surface.configure(&device, &config);
         let pipeline = pipeline::create(&device, surface_format);
 
+        let msaa_view = pipeline::create_msaa_texture(&device, surface_format, width, height);
         let buffers = BufferPool::new(&device);
         let mut fonts = FontRegistry::new();
         fonts.register(AtariMini);
@@ -58,6 +60,7 @@ impl WgpuRenderer {
             pipeline,
             surface,
             config,
+            msaa_view,
             buffers,
             fonts,
             geometry: Geometry::new(),
@@ -71,6 +74,7 @@ impl WgpuRenderer {
             self.config.width = width;
             self.config.height = height;
             self.surface.configure(&self.device, &self.config);
+            self.msaa_view = pipeline::create_msaa_texture(&self.device, self.config.format, width, height);
         }
     }
 }
@@ -153,8 +157,8 @@ impl WgpuRenderer {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: &frame.view,
-                    resolve_target: None,
+                    view: &self.msaa_view,
+                    resolve_target: Some(&frame.view),
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(self.state.clear_color()),
                         store: wgpu::StoreOp::Store,

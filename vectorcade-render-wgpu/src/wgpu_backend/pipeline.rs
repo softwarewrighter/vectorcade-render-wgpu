@@ -2,6 +2,9 @@
 
 use crate::tessellate::Vertex;
 
+/// MSAA sample count for anti-aliasing.
+pub const SAMPLE_COUNT: u32 = 4;
+
 /// WGSL shader source for vertex and fragment stages.
 pub const SHADER_SOURCE: &str = r#"
 struct VertexInput {
@@ -65,7 +68,11 @@ pub fn create(device: &wgpu::Device, format: wgpu::TextureFormat) -> wgpu::Rende
             ..Default::default()
         },
         depth_stencil: None,
-        multisample: wgpu::MultisampleState::default(),
+        multisample: wgpu::MultisampleState {
+            count: SAMPLE_COUNT,
+            mask: !0,
+            alpha_to_coverage_enabled: false,
+        },
         multiview: None,
     })
 }
@@ -87,6 +94,26 @@ fn vertex_layout() -> wgpu::VertexBufferLayout<'static> {
             },
         ],
     }
+}
+
+/// Create MSAA texture for multisampled rendering.
+pub fn create_msaa_texture(
+    device: &wgpu::Device,
+    format: wgpu::TextureFormat,
+    width: u32,
+    height: u32,
+) -> wgpu::TextureView {
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("MSAA Texture"),
+        size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+        mip_level_count: 1,
+        sample_count: SAMPLE_COUNT,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+        view_formats: &[],
+    });
+    texture.create_view(&wgpu::TextureViewDescriptor::default())
 }
 
 /// Initialize wgpu device, queue, and surface configuration.
