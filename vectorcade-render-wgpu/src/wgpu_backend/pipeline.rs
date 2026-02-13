@@ -133,16 +133,7 @@ pub async fn init_device(
         .ok_or("Failed to find suitable GPU adapter")?;
 
     let (device, queue) = adapter
-        .request_device(
-            &wgpu::DeviceDescriptor {
-                label: Some("VectorCade Device"),
-                required_features: wgpu::Features::empty(),
-                // Use downlevel defaults for maximum WebGPU browser compatibility
-                required_limits: wgpu::Limits::downlevel_webgl2_defaults(),
-                ..Default::default()
-            },
-            None,
-        )
+        .request_device(&wgpu::DeviceDescriptor::default(), None)
         .await
         .map_err(|e| e.to_string())?;
 
