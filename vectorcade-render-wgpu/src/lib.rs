@@ -1,7 +1,33 @@
 //! Renderer backend (wgpu + lyon) for VectorCade.
 //!
 //! This crate provides GPU-accelerated rendering for VectorCade games.
-//! It converts `DrawCmd` display-lists into rendered output using wgpu and lyon.
+//! It converts `DrawCmd` display-lists
+//! into rendered output using wgpu and lyon tessellation.
+//!
+//! # Features
+//!
+//! - **Line tessellation** via lyon with round caps/joins
+//! - **Transform stack** for hierarchical rendering
+//! - **Text rendering** via vectorcade-fonts (Atari, Cinematronics, Midway styles)
+//! - **4x MSAA** anti-aliasing for smooth edges
+//! - **WASM compatible** for WebGPU in browsers
+//!
+//! # Usage
+//!
+//! ```ignore
+//! use vectorcade_render_wgpu::{WgpuRenderer, VectorRenderer};
+//!
+//! // Create renderer (requires window handle)
+//! let mut renderer = WgpuRenderer::new(window, width, height).await?;
+//!
+//! // Render draw commands from a game
+//! let stats = renderer.render(&draw_commands);
+//! println!("Rendered {} lines, {} polylines", stats.lines, stats.polylines);
+//! ```
+//!
+//! # Feature Flags
+//!
+//! - `wgpu-backend` - Enables GPU rendering via wgpu (includes vectorcade-fonts)
 //!
 //! # Modules
 //!
