@@ -5,11 +5,9 @@
 //!
 //! # Modules
 //!
-//! - [`null`] - Null renderer for testing and headless runs
 //! - [`tessellate`] - Line tessellation using lyon
 //! - [`wgpu_backend`] - GPU renderer (requires `wgpu-backend` feature)
 
-mod null;
 pub mod tessellate;
 
 #[cfg(feature = "wgpu-backend")]
@@ -36,7 +34,26 @@ pub trait VectorRenderer {
     fn render(&mut self, cmds: &[DrawCmd]) -> RenderStats;
 }
 
-pub use null::NullRenderer;
+/// Placeholder renderer for tests and headless runs.
+///
+/// Counts draw commands without producing any visual output.
+pub struct NullRenderer;
+
+impl VectorRenderer for NullRenderer {
+    fn render(&mut self, cmds: &[DrawCmd]) -> RenderStats {
+        let mut stats = RenderStats::default();
+        for cmd in cmds {
+            match cmd {
+                DrawCmd::Line(_) => stats.lines += 1,
+                DrawCmd::Polyline { .. } => stats.polylines += 1,
+                DrawCmd::Text { .. } => stats.text_runs += 1,
+                _ => {}
+            }
+        }
+        stats
+    }
+}
+
 pub use tessellate::{Geometry, Vertex};
 
 #[cfg(feature = "wgpu-backend")]

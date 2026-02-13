@@ -39,9 +39,9 @@
 - [x] Minimize allocations
 
 ### Task 2.3: Text Rendering
-- [ ] Integrate with vectorcade-fonts
-- [ ] Render text as tessellated polylines
-- [ ] Support FontStyleId selection
+- [x] Integrate with vectorcade-fonts
+- [x] Render text as tessellated polylines
+- [x] Support FontStyleId selection
 
 ## Phase 3: Polish
 
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 2.3 - Text rendering via vectorcade-fonts
+**Next Step**: Phase 3 - Visual quality polish (line caps, joins, anti-aliasing)

@@ -7,6 +7,7 @@ description = "WGPU renderer backend for VectorCade."
 
 [dependencies]
 vectorcade-shared = { version = "0.1.0" }
+vectorcade-fonts = { version = "0.1.0", optional = true }
 lyon = "1.0"
 bytemuck = { version = "1.14", features = ["derive"] }
 glam = "0.27"
@@ -16,7 +17,7 @@ wgpu = { version = "0.20", optional = true }
 
 [features]
 default = []
-wgpu-backend = ["dep:wgpu"]
+wgpu-backend = ["dep:wgpu", "dep:vectorcade-fonts"]
 
 [dev-dependencies]
 glam = "0.27"
