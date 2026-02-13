@@ -1,3 +1,6 @@
 [workspace]
 members = ["vectorcade-render-wgpu"]
 resolver = "2"
+
+[workspace.package]
+edition = "2024"
