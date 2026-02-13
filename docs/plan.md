@@ -57,9 +57,9 @@
 - [ ] Add glow intensity control
 
 ### Task 3.3: WASM Build
-- [ ] Configure wasm-pack
-- [ ] Test in browser with WebGPU
-- [ ] Verify performance on web
+- [x] Configure wasm-pack
+- [x] Test in browser with WebGPU
+- [x] Verify performance on web
 
 ## Phase 4: Integration
 
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 3.2 - Phosphor Glow (optional) or Task 3.3 - WASM Build
+**Next Step**: Phase 4 - Integration testing with games
