@@ -33,10 +33,10 @@
 - [x] Add render stats tracking
 
 ### Task 2.2: Buffer Management
-- [ ] Create vertex buffer pool
-- [ ] Implement dynamic buffer resizing
-- [ ] Optimize for per-frame updates
-- [ ] Minimize allocations
+- [x] Create vertex buffer pool
+- [x] Implement dynamic buffer resizing
+- [x] Optimize for per-frame updates
+- [x] Minimize allocations
 
 ### Task 2.3: Text Rendering
 - [ ] Integrate with vectorcade-fonts
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 2.2 - Buffer pooling and management
+**Next Step**: Task 2.3 - Text rendering via vectorcade-fonts

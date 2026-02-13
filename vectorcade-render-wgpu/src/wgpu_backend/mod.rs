@@ -3,14 +3,15 @@
 //! This module provides the `WgpuRenderer` which renders `DrawCmd` display-lists
 //! using wgpu (WebGPU in browser, Vulkan/Metal/DX12 native).
 
+mod buffers;
 mod pipeline;
 mod state;
 
+use buffers::BufferPool;
 use crate::tessellate::{Geometry, tessellate_line, tessellate_polyline};
 use crate::{RenderStats, VectorRenderer};
 use state::RenderState;
 use vectorcade_shared::draw::DrawCmd;
-use wgpu::util::DeviceExt;
 
 /// GPU renderer using wgpu.
 pub struct WgpuRenderer {
@@ -19,6 +20,7 @@ pub struct WgpuRenderer {
     pipeline: wgpu::RenderPipeline,
     surface: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
+    buffers: BufferPool,
     geometry: Geometry,
     state: RenderState,
 }
@@ -40,12 +42,15 @@ impl WgpuRenderer {
         surface.configure(&device, &config);
         let pipeline = pipeline::create(&device, surface_format);
 
+        let buffers = BufferPool::new(&device);
+
         Ok(Self {
             device,
             queue,
             pipeline,
             surface,
             config,
+            buffers,
             geometry: Geometry::new(),
             state: RenderState::default(),
         })
@@ -70,6 +75,7 @@ impl VectorRenderer for WgpuRenderer {
             return stats;
         };
 
+        self.update_buffers();
         self.draw_frame(&frame);
         frame.output.present();
         stats
@@ -116,23 +122,16 @@ impl WgpuRenderer {
         Some(Frame { output, view })
     }
 
+    fn update_buffers(&mut self) {
+        self.buffers.update(
+            &self.device,
+            &self.queue,
+            &self.geometry.vertices,
+            &self.geometry.indices,
+        );
+    }
+
     fn draw_frame(&self, frame: &Frame) {
-        let vertex_buffer = self
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Vertex Buffer"),
-                contents: bytemuck::cast_slice(&self.geometry.vertices),
-                usage: wgpu::BufferUsages::VERTEX,
-            });
-
-        let index_buffer = self
-            .device
-            .create_buffer_init(&wgpu::util::BufferInitDescriptor {
-                label: Some("Index Buffer"),
-                contents: bytemuck::cast_slice(&self.geometry.indices),
-                usage: wgpu::BufferUsages::INDEX,
-            });
-
         let mut encoder = self.device.create_command_encoder(&Default::default());
         {
             let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -149,8 +148,8 @@ impl WgpuRenderer {
             });
 
             pass.set_pipeline(&self.pipeline);
-            pass.set_vertex_buffer(0, vertex_buffer.slice(..));
-            pass.set_index_buffer(index_buffer.slice(..), wgpu::IndexFormat::Uint32);
+            pass.set_vertex_buffer(0, self.buffers.vertex.slice(..));
+            pass.set_index_buffer(self.buffers.index.slice(..), wgpu::IndexFormat::Uint32);
             pass.draw_indexed(0..self.geometry.indices.len() as u32, 0, 0..1);
         }
         self.queue.submit(std::iter::once(encoder.finish()));
