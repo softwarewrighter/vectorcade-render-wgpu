@@ -4,7 +4,7 @@
 
 **Date**: 2026-02-12
 **Phase**: 1 - Foundation
-**Task**: 1.2 - Lyon Integration (Next)
+**Task**: 1.3 - wgpu Backend Skeleton (Next)
 
 ## Summary
 
@@ -54,3 +54,4 @@ The vectorcade-render-wgpu project is in its initial state. The basic project st
 | 2026-02-12 | Initial project setup with skeleton API |
 | 2026-02-12 | Created documentation files (architecture, prd, design, plan, status) |
 | 2026-02-12 | Added NullRenderer tests, split lib.rs into modules |
+| 2026-02-12 | Added lyon tessellation module with line/polyline support |

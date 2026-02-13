@@ -10,11 +10,11 @@
 - [x] Run clippy/fmt checks
 
 ### Task 1.2: Lyon Integration
-- [ ] Add lyon dependency
-- [ ] Create tessellation module
-- [ ] Implement line tessellation
-- [ ] Implement polyline tessellation
-- [ ] Add unit tests for tessellation
+- [x] Add lyon dependency
+- [x] Create tessellation module
+- [x] Implement line tessellation
+- [x] Implement polyline tessellation
+- [x] Add unit tests for tessellation
 
 ### Task 1.3: wgpu Backend Skeleton
 - [ ] Add wgpu dependency (feature-gated)
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 1.2 - Lyon tessellation integration
+**Next Step**: Task 1.3 - wgpu backend skeleton
