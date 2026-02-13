@@ -17,11 +17,11 @@
 - [x] Add unit tests for tessellation
 
 ### Task 1.3: wgpu Backend Skeleton
-- [ ] Add wgpu dependency (feature-gated)
-- [ ] Create WgpuRenderer struct
-- [ ] Implement initialization (Instance, Device, Queue)
-- [ ] Create render pipeline with basic shaders
-- [ ] Implement simple triangle rendering
+- [x] Add wgpu dependency (feature-gated)
+- [x] Create WgpuRenderer struct
+- [x] Implement initialization (Instance, Device, Queue)
+- [x] Create render pipeline with basic shaders
+- [x] Implement triangle rendering from tessellated geometry
 
 ## Phase 2: Core Rendering
 
@@ -83,4 +83,4 @@
 
 ## Current Focus
 
-**Next Step**: Task 1.3 - wgpu backend skeleton
+**Next Step**: Task 2.1 - DrawCmd processing (Clear, transform stack)

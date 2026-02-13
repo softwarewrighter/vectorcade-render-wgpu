@@ -10,7 +10,7 @@ use lyon::tessellation::{
 use vectorcade_shared::draw::{Line2, Stroke};
 
 /// A vertex with position and color for GPU rendering.
-#[derive(Clone, Copy, Debug, Default)]
+#[derive(Clone, Copy, Debug, Default, bytemuck::Pod, bytemuck::Zeroable)]
 #[repr(C)]
 pub struct Vertex {
     pub position: [f32; 2],
