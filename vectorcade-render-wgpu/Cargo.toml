@@ -24,3 +24,4 @@ wgpu-backend = ["dep:wgpu", "dep:vectorcade-fonts"]
 
 [dev-dependencies]
 glam = "0.27"
+pollster = "0.4"

@@ -8,6 +8,34 @@ use vectorcade_shared::draw::{DrawCmd, Line2, Stroke};
 use vectorcade_shared::font::FontStyleId;
 use vectorcade_shared::Rgba;
 
+/// Smoke test: verify wgpu device creation succeeds (headless, no surface).
+#[cfg(feature = "wgpu-backend")]
+#[test]
+fn wgpu_device_creation_smoke_test() {
+    // This test runs synchronously using pollster to block on async
+    pollster::block_on(async {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
+                power_preference: wgpu::PowerPreference::default(),
+                compatible_surface: None, // headless
+                force_fallback_adapter: false,
+            })
+            .await
+            .expect("Failed to find GPU adapter");
+
+        let (device, _queue) = adapter
+            .request_device(&wgpu::DeviceDescriptor::default(), None)
+            .await
+            .expect("Failed to create device");
+
+        // Verify we got a valid device by checking its limits
+        let limits = device.limits();
+        assert!(limits.max_texture_dimension_2d > 0, "Device should have valid limits");
+    });
+}
+
 fn white_stroke(width: f32) -> Stroke {
     Stroke::new(Rgba::WHITE, width)
 }
