@@ -24,15 +24,17 @@ pub fn tessellate_text(params: &TextParams<'_>, transform: Option<&Mat3>, geom: 
     let Some(font) = params.registry.get(params.style) else { return };
     // Stroke width in pixels, will be converted to NDC in tessellate_polyline
     let stroke = Stroke::new(params.color, params.size_px * 0.08);
+    // Convert size from pixels to NDC for glyph scaling
+    let size_ndc = params.size_px * params.px_to_ndc;
     let mut cursor_x = params.pos.x;
 
     for ch in params.text.chars() {
         if font.has_glyph(ch) {
             for path in font.glyph_paths(ch) {
-                tessellate_glyph(&path.cmds, cursor_x, params.pos.y, params.size_px, &stroke, transform, params.px_to_ndc, geom);
+                tessellate_glyph(&path.cmds, cursor_x, params.pos.y, size_ndc, &stroke, transform, params.px_to_ndc, geom);
             }
         }
-        cursor_x += font.advance(ch) * params.size_px;
+        cursor_x += font.advance(ch) * size_ndc;
     }
 }
 
