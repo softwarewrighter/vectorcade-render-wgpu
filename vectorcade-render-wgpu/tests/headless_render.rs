@@ -87,6 +87,8 @@ fn headless_render_produces_visible_output() {
 
         // 4. Tessellate a white triangle in the center
         let mut geom = Geometry::new();
+        // px_to_ndc = 1.0 since we're using NDC-scale stroke widths in this test
+        let px_to_ndc = 1.0;
 
         // Draw a large white triangle
         let stroke = Stroke::new(Rgba::WHITE, 0.05); // stroke width in NDC
@@ -99,6 +101,7 @@ fn headless_render_produces_visible_output() {
             true, // closed
             &stroke,
             None,
+            px_to_ndc,
             &mut geom,
         );
 
@@ -110,6 +113,7 @@ fn headless_render_produces_visible_output() {
                 stroke: Stroke::new(Rgba(1.0, 0.0, 0.0, 1.0), 0.02), // red horizontal line
             },
             None,
+            px_to_ndc,
             &mut geom,
         );
 

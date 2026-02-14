@@ -15,18 +15,21 @@ pub struct TextParams<'a> {
     pub size_px: f32,
     pub color: Rgba,
     pub style: FontStyleId,
+    /// Pixel to NDC conversion factor (typically `2.0 / viewport_height`).
+    pub px_to_ndc: f32,
 }
 
 /// Render text into geometry using the given font registry.
 pub fn tessellate_text(params: &TextParams<'_>, transform: Option<&Mat3>, geom: &mut Geometry) {
     let Some(font) = params.registry.get(params.style) else { return };
+    // Stroke width in pixels, will be converted to NDC in tessellate_polyline
     let stroke = Stroke::new(params.color, params.size_px * 0.08);
     let mut cursor_x = params.pos.x;
 
     for ch in params.text.chars() {
         if font.has_glyph(ch) {
             for path in font.glyph_paths(ch) {
-                tessellate_glyph(&path.cmds, cursor_x, params.pos.y, params.size_px, &stroke, transform, geom);
+                tessellate_glyph(&path.cmds, cursor_x, params.pos.y, params.size_px, &stroke, transform, params.px_to_ndc, geom);
             }
         }
         cursor_x += font.advance(ch) * params.size_px;
@@ -40,6 +43,7 @@ fn tessellate_glyph(
     scale: f32,
     stroke: &Stroke,
     transform: Option<&Mat3>,
+    px_to_ndc: f32,
     geom: &mut Geometry,
 ) {
     let mut pts: Vec<[f32; 2]> = Vec::new();
@@ -48,7 +52,7 @@ fn tessellate_glyph(
     for cmd in cmds {
         match cmd {
             GlyphPathCmd::MoveTo(p) => {
-                flush_path(&pts, closed, stroke, transform, geom);
+                flush_path(&pts, closed, stroke, transform, px_to_ndc, geom);
                 pts.clear();
                 closed = false;
                 pts.push(transform_glyph_pt(*p, x_offset, y_offset, scale));
@@ -61,7 +65,7 @@ fn tessellate_glyph(
             }
         }
     }
-    flush_path(&pts, closed, stroke, transform, geom);
+    flush_path(&pts, closed, stroke, transform, px_to_ndc, geom);
 }
 
 fn transform_glyph_pt(p: Vec2, x_offset: f32, y_offset: f32, scale: f32) -> [f32; 2] {
@@ -73,9 +77,10 @@ fn flush_path(
     closed: bool,
     stroke: &Stroke,
     transform: Option<&Mat3>,
+    px_to_ndc: f32,
     geom: &mut Geometry,
 ) {
     if pts.len() >= 2 {
-        tessellate_polyline(pts, closed, stroke, transform, geom);
+        tessellate_polyline(pts, closed, stroke, transform, px_to_ndc, geom);
     }
 }

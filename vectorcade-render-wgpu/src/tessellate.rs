@@ -40,7 +40,9 @@ impl Geometry {
 }
 
 /// Tessellate a single line segment into triangles.
-pub fn tessellate_line(line: &Line2, transform: Option<&Mat3>, geom: &mut Geometry) {
+///
+/// `px_to_ndc` converts pixel measurements to NDC units (typically `2.0 / viewport_height`).
+pub fn tessellate_line(line: &Line2, transform: Option<&Mat3>, px_to_ndc: f32, geom: &mut Geometry) {
     let xform = |p: [f32; 2], t: &Mat3| {
         let r = *t * glam::Vec3::new(p[0], p[1], 1.0);
         [r.x, r.y]
@@ -49,15 +51,18 @@ pub fn tessellate_line(line: &Line2, transform: Option<&Mat3>, geom: &mut Geomet
         Some(t) => (xform(line.a.into(), t), xform(line.b.into(), t)),
         None => (line.a.into(), line.b.into()),
     };
-    tessellate_stroke(&[a, b], false, &line.stroke, geom);
+    tessellate_stroke(&[a, b], false, &line.stroke, px_to_ndc, geom);
 }
 
 /// Tessellate a polyline into triangles.
+///
+/// `px_to_ndc` converts pixel measurements to NDC units (typically `2.0 / viewport_height`).
 pub fn tessellate_polyline(
     pts: &[[f32; 2]],
     closed: bool,
     stroke: &Stroke,
     transform: Option<&Mat3>,
+    px_to_ndc: f32,
     geom: &mut Geometry,
 ) {
     let pts: Vec<[f32; 2]> = match transform {
@@ -70,17 +75,19 @@ pub fn tessellate_polyline(
             .collect(),
         None => pts.to_vec(),
     };
-    tessellate_stroke(&pts, closed, stroke, geom);
+    tessellate_stroke(&pts, closed, stroke, px_to_ndc, geom);
 }
 
-fn tessellate_stroke(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, geom: &mut Geometry) {
+fn tessellate_stroke(pts: &[[f32; 2]], closed: bool, stroke: &Stroke, px_to_ndc: f32, geom: &mut Geometry) {
     if pts.len() < 2 {
         return;
     }
 
     let path = build_path(pts, closed);
+    // Convert pixel width to NDC units
+    let width_ndc = stroke.width_px * px_to_ndc;
     let options = StrokeOptions::default()
-        .with_line_width(stroke.width_px)
+        .with_line_width(width_ndc)
         .with_line_cap(LineCap::Round)
         .with_line_join(LineJoin::Round);
     let color = [

@@ -109,9 +109,15 @@ impl VectorRenderer for WgpuRenderer {
 }
 
 impl WgpuRenderer {
+    /// Calculate pixel to NDC conversion factor.
+    fn px_to_ndc(&self) -> f32 {
+        2.0 / self.config.height as f32
+    }
+
     fn tessellate_commands(&mut self, cmds: &[DrawCmd]) -> RenderStats {
         let mut stats = RenderStats::default();
         self.geometry.clear();
+        let px_to_ndc = self.px_to_ndc();
 
         for cmd in cmds {
             match cmd {
@@ -120,7 +126,7 @@ impl WgpuRenderer {
                 DrawCmd::PopTransform => self.state.pop(),
                 DrawCmd::Line(line) => {
                     let t = self.state.transform_opt();
-                    tessellate_line(line, t.as_ref(), &mut self.geometry);
+                    tessellate_line(line, t.as_ref(), px_to_ndc, &mut self.geometry);
                     stats.lines += 1;
                 }
                 DrawCmd::Polyline {
@@ -130,13 +136,13 @@ impl WgpuRenderer {
                 } => {
                     let t = self.state.transform_opt();
                     let pts: Vec<[f32; 2]> = pts.iter().map(|v| [v.x, v.y]).collect();
-                    tessellate_polyline(&pts, *closed, stroke, t.as_ref(), &mut self.geometry);
+                    tessellate_polyline(&pts, *closed, stroke, t.as_ref(), px_to_ndc, &mut self.geometry);
                     stats.polylines += 1;
                 }
                 DrawCmd::Text { pos, text, size_px, color, style } => {
                     let t = self.state.transform_opt();
                     let params = text::TextParams {
-                        registry: &self.fonts, text, pos: *pos, size_px: *size_px, color: *color, style: *style,
+                        registry: &self.fonts, text, pos: *pos, size_px: *size_px, color: *color, style: *style, px_to_ndc,
                     };
                     text::tessellate_text(&params, t.as_ref(), &mut self.geometry);
                     stats.text_runs += 1;
